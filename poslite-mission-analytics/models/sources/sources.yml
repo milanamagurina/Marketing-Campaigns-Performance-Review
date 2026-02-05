@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: poslite_raw
+    database: your_database          # e.g. "dbt-tutorial" or omit if not needed
+    schema: your_raw_schema          # e.g. "poslite_raw"
+
+    tables:
+      - name: channels
+        loaded_at_field: _etl_loaded_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+        columns:
+          - name: campaign_id
+            tests: [not_null, unique]
+
+      - name: web_orders
+        loaded_at_field: _etl_loaded_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+        columns:
+          - name: date
+            tests: [not_null]
+          - name: country_code
+            tests: [not_null]
+          - name: campaign_id
+            tests: [not_null]
+
+      - name: leads_funnel
+        loaded_at_field: _etl_loaded_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+        columns:
+          - name: date
+            tests: [not_null]
+          - name: country_code
+            tests: [not_null]
+          - name: campaign_id
+            tests: [not_null]
