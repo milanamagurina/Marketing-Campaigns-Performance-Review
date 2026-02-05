@@ -1,210 +1,310 @@
-Marketing Campaigns Performance Review
+# Marketing Campaigns Performance Review
 
-Analyze and model POS Lite marketing and sales funnels into a scalable KPI mart, including QA and a dashboard proposal.
+---
 
-Part 1 — Metrics
-1.1. Top KPIs
+Analyze and model POS Lite marketing and sales funnels into a scalable KPI mart, with QA and a dashboard proposal.
 
-Question:
+---
+
+## Part 1 — Metrics
+
+---
+
+### 1.1 Top KPIs
+
+**Question**  
 What are the top 3–5 KPIs the Mission Lead should track to evaluate the health of both the Self-Service (Web) and Sales-Assisted funnels?
 
-This project defines a simple metric tree to evaluate campaign efficiency and revenue health.
+---
 
-<img width="2215" height="1805" alt="image" src="https://github.com/user-attachments/assets/ba7088b3-cd84-42fb-a972-650464f0ab8f" />
+Please find here a simple metric tree to evaluate campaign efficiency and revenue health:
 
-The top three KPIs the Mission Lead should track are:
+<img width="2215" height="1805" alt="image" src="https://github.com/user-attachments/assets/596f8cec-4b24-48b2-84ee-7c30dc4c95ad" />
 
-CAC (or CPO) — Cost per Ordered POS Lite / Deal
-Measures the real impact of marketing and sales on revenue.
+---
 
-Conversion Rate
-Tracks funnel effectiveness. For this assessment, I calculate conversion specifically from Leads to Meetings.
+**Top KPIs to track**
 
-Total Spend
-Enables budget control and supports forecasting and predictive modeling.
+* **CAC (or CPO)**  
+  Cost per Ordered POS Lite / Deal  
+  Measures the real impact of marketing and sales on revenue.
 
-1.2. Cost per Lead vs. Sales Cycle Duration
+* **Conversion Rate**  
+  Tracks funnel effectiveness.  
+  For this assessment, conversion is calculated from **Leads → Meetings** only.
 
-Question:
+* **Total Spend**  
+  Supports budgeting, forecasting, and predictive modeling.
+
+---
+
+### 1.2 Cost per Lead vs. Sales Cycle Duration
+
+---
+
+**Question**  
 If Cost per Lead is decreasing while Sales Cycle Duration is increasing, is that good or bad?
 
-Answer:
+---
+
+**Answer**  
 This should be evaluated as a system with interdependent metrics.
 
-Cost per Lead (CPL) ↓ — Positive signal
-The company is acquiring interest more cost-efficiently, which improves unit economics if lead quality remains stable.
+---
 
-Sales Cycle Duration ↑ — Context-dependent
+* **Cost per Lead ↓ — Positive**
+  * Indicates more cost-efficient lead acquisition
+  * Improves unit economics if lead quality remains stable
 
-Negative scenario:
-Longer deal cycles usually mean slower revenue realization, reduced sales throughput, and increased sales effort per deal. For transaction-based revenue models, this delays volume ramp-up.
+* **Sales Cycle Duration ↑ — Context dependent**
+  * **Negative scenario**
+    * Slower revenue realization
+    * Lower sales throughput
+    * Higher sales effort per deal
+  * **Potentially positive scenario**
+    * Movement upmarket to larger merchants
+    * Higher expected transaction volume or LTV
+    * Acceptable if close rates and payback remain strong
 
-Potentially positive scenario:
-If the longer cycle is driven by moving upmarket to larger merchants with higher expected transaction volume or LTV—and close rates and payback periods remain strong—this may be acceptable.
+---
 
-In most cases, falling CPL combined with rising cycle duration signals lower-intent or lower-quality leads.
+**Conclusion**  
+Falling CPL combined with rising sales cycle duration often signals lower-intent or lower-quality leads.
 
-Part 2 — Data Structure
-2.1. Data Model
+---
 
-Please see the model definition in:
-mart_marketing_performance.sql
+## Part 2 — Data Structure
 
-2.2. dbt and Sources
+---
+
+### 2.1 Data Model
+
+---
+Please find the sample version with macroses to clean the data here:
+* Model definition:  
+  `mart_marketing_performance.sql`
+
+---
+
+### 2.2 dbt and Sources
+
+---
 
 I use modular, reusable metric pipelines and dbt models.
 
-The example dbt project structure is available in the poslite-missing-analytics folder.
+---
 
-Assumptions and practices:
+* Example dbt project structure:  
+  `poslite-missing-analytics`
 
-Each source includes _etl_loaded_at
+---
 
-Freshness checks detect ingestion delays
+**Assumptions and practices**
 
-Source-level tests ensure schema stability and data quality
+* Each source includes `_etl_loaded_at`
+* Freshness checks detect ingestion delays
+* Source-level tests ensure schema stability and data quality
 
-2.2.1. Freshness Policy
+---
 
-Warning: 12–17 hours
+### 2.2.1 Freshness Policy
 
-Error: 24 hours
+---
 
-Source tests can be run independently.
+* **Warning:** 12–17 hours
+* **Error:** 24 hours
 
-2.2.2. Snapshots & Metric Reconciliation
+---
 
-Marketing metrics (e.g., spend and impressions) may be updated after ingestion.
+* Source tests can be run independently
+
+---
+
+### 2.2.2 Snapshots and Metric Reconciliation
+
+---
+
+Marketing metrics (e.g. spend and impressions) may be updated after ingestion.  
 dbt snapshots are used to preserve history and reconcile changes.
 
-Snapshots are not used as dbt models, but as sources
+---
 
-Timestamp-based snapshots use _etl_loaded_at
+**Snapshot setup**
 
-Stored in a dedicated snapshots schema
+* Used as sources, not dbt models
+* Timestamp-based snapshots using `_etl_loaded_at`
+* Stored in a dedicated `snapshots` schema
 
-Surrogate Key Proposal
+---
+
+**Surrogate key proposal**
 
 A deterministic surrogate key is built from:
 
-campaign_id, campaign_name
+* `campaign_id`
+* `campaign_name`
+* `date`
+* `country_code`
+* `channel_3`
+* `channel_4`
+* `channel_5`
+* `_etl_loaded_at`
 
-date, country_code
+---
 
-channel_3, channel_4, channel_5
+* Keys are generated using dbt macros for null safety and consistency
 
-_etl_loaded_at
+---
 
-Keys are generated using dbt macros for null safety and consistency.
+**Reconciliation logic**
 
-Reconciliation Logic
+* Daily spend and impressions reconciled using `MAX()` per campaign and day
+* Matches dashboard logic requiring the latest known daily values
 
-Daily spend and impressions are reconciled using MAX() per campaign and day
+---
 
-This matches dashboard logic, which requires the latest known daily values
+### 2.2.3 Intermediate Layer (Business Logic)
 
-2.2.3. Intermediate Layer (Business Logic)
+---
 
-Responsibilities:
+Responsibilities
 
-Apply core business rules and reconciliation logic
+* Apply core business rules and reconciliation logic
+* Join facts to campaign and channel dimensions
+* Reconcile late-arriving data using snapshots
+* Align grains across funnels (daily × campaign × country)
+* Build unified funnel structures
 
-Join fact tables to campaign and channel dimensions
+---
 
-Reconcile late-arriving data using snapshots
+* Spend, impressions, and funnel steps reconciled using `MAX()`
+* Assumptions documented and enforced consistently
 
-Align grains across funnels (daily × campaign × country)
+---
 
-Build unified funnel structures
+### 2.2.4 Testing Strategy
 
-Spend, impressions, and funnel steps are reconciled using MAX() per day and campaign.
-All assumptions are documented and enforced consistently.
+---
 
-2.2.4. Testing Strategy
+* **Source tests**
+  * Freshness
+  * Schema validation
+  * Referential integrity
 
-Source tests: freshness, schema validation, referential integrity
+* **Singular tests**
+  * Business assertions (e.g. non-negative spend)
 
-Singular tests: business assertions (e.g., non-negative spend)
+* **Model tests**
+  * `not_null`
+  * `unique`
+  * `accepted_values`
+  * Funnel monotonicity
 
-Model tests: not_null, unique, accepted_values, funnel monotonicity
+---
 
-2.2.5. Orchestration & Production Readiness
+### 2.2.5 Orchestration and Production Readiness
 
-Models run daily
+---
 
-Snapshots execute before downstream models
+* Models run daily
+* Snapshots execute before downstream models
 
-Part 3 — Dataset Exploration
-3.1. Data Quality Issues Identified
+---
 
-Several behavioral metric columns contain missing values (NaNs), with frequent gaps.
+## Part 3 — Dataset Exploration
 
-In some cases, impressions and ordered/deal metrics are present, while intermediate funnel metrics are missing.
+---
 
-Time-based alignment between spend and behavioral metrics (e.g., clicks) is inconsistent; clicks do not always peak when spend peaks.
+### 3.1 Data Quality Issues Identified
 
-To address this, a Python-based approach was used to select the maximum observed values for clicks and spend.
+---
 
-Some campaign_id values were missing from the channels dictionary.
+* Behavioral metric columns contain missing values (NaNs)
+* Intermediate funnel steps are sometimes missing while impressions or orders exist
+* Spend and behavioral metrics are not always time-aligned
+  * Clicks do not always peak when spend peaks
+  * Python-based reconciliation uses maximum observed values
+* Some `campaign_id` values are missing from the channels dictionary
+  * Assumed `campaign_id` + `campaign_name` uniqueness within this dataset
+  * Assumption does not contradict provided data
+* Additional Python-based cleaning
+  * Row filtering
+  * Dictionary-based channel imputation
+ 
+I added my exploratory notebook on the github.
 
-Based on dataset exploration, campaign_id and campaign_name were assumed to form a unique mapping within this dataset.
+---
 
-Although external sources suggest this is not always true, the assumption does not introduce contradictions in the provided data.
+### 3.2 Recommendations for the Marketing Team
 
-Additional data cleaning was performed in Python, including row filtering and dictionary-based imputation of channel attributes.
 
-3.2. Recommendations for the Marketing Team
+---
 
-Based on dashboard insights and prior analytical experience:
+**Good initiatives to start**
 
-Good initiatives to start
+* **Predictive analytics for sales prioritization**
+  * 28-day rolling window aligned with a two-week sales cycle
+  * Contact-form submissions drive most order spikes
+  * Opportunity to automate lead scoring
 
-Leverage predictive analytics for sales prioritization
-Using a 28-day rolling window (aligned with a two-week sales cycle), spikes in total orders are often driven by contact-form submissions rather than web orders.
-This indicates an opportunity to automate lead segmentation and build a machine learning model to predict high-value leads for sales prioritization.
+* **Simplify the sign-up flow**
+  * Lowest conversion rate in the funnel
+  * Reducing friction could improve downstream performance
 
-Simplify the sign-up flow
-Funnel analysis shows the sign-up stage has the lowest conversion rate. Reducing friction or steps in onboarding could materially improve downstream performance.
+* **Further optimize Facebook targeting**
+  * Low silent-lead volume for contact-form traffic
+  * Opportunity to improve targeting, creatives, or structure
 
-Further optimize Facebook targeting
-Facebook generates a relatively low volume of silent leads, particularly for contact-form traffic. Improvements may be possible through audience refinement, creative optimization, or campaign restructuring.
+---
 
-Areas to revise
+**Areas to improve**
 
-Relying solely on manual sales lead processing
-Given observed lead volumes and CAC/CBO optimization goals, manual processes limit scalability and may constrain revenue growth.
+* **Manual sales lead processing**
+  * Limits scalability
+  * Constrains sales efficiency under CAC/CBO optimization goals
 
-Continue (with optimization)
+---
 
-Spend optimization using rolling performance windows
-The 28-day rolling window is appropriate, as it captures the full sales cycle and ensures metric completeness.
+**Continue with optimization**
 
-Optimizing CAC / cost per sale rather than surface metrics
-This remains the correct optimization objective, but should be paired with automated sales-lead workflows to unlock full efficiency gains.
+* **Spend optimization using rolling windows**
+  * 28-day window captures the full sales cycle
+  * Ensures data completeness
 
-3.3. Dashboard
+* **Optimize CAC / cost per sale**
+  * Correct primary optimization metric
+  * Should be paired with automated sales workflows
 
-Dashboard link:
-https://public.tableau.com/app/profile/milana.magurina/viz/Pos-LiteCampaignsPerformanceOverview/PerformanceOverview?publish=yes
+---
 
-Part 4 — Attribution & Advanced Recommendations
+### 3.3 Dashboard
 
-During the analysis, ChatGPT search was used to validate whether reconciliation between campaign_id and campaign_name could be treated as consistent. While initial review suggested this was acceptable, further external research confirmed that these fields are not fully compatible in real-world marketing data. This double validation highlighted common limitations in campaign-level attribution.
+---
 
-Based on this task and prior experience, additional value could be created through workflow automation and AI-driven attribution.
+* Tableau dashboard  
+  https://public.tableau.com/app/profile/milana.magurina/viz/Pos-LiteCampaignsPerformanceOverview/PerformanceOverview?publish=yes
 
-Key observations and recommendations:
+---
 
-In the dataset, six campaign IDs appear in both Web and Sales-Assisted datasets.
+## Part 4 — Attribution and Advanced Recommendations
 
-To improve metric reliability and reconciliation quality, I recommend introducing automated user-level attribution logic that goes beyond first-touch or last-touch models.
+---
 
-Apply segmentation and regression models to cluster users by behavioral patterns and better infer the true conversion source.
+During the analysis, external research was used to validate whether `campaign_id` and `campaign_name` could be treated as consistent.  
+This validation confirmed that they are not fully reliable in real-world marketing data.
 
-This approach would:
+---
 
-Improve attribution accuracy
+**Key observations and recommendations**
 
-Reduce manual reconciliation
+* Six campaign IDs appear in both Web and Sales-Assisted datasets
+* Introduce user-level attribution beyond first-touch or last-touch
+* Apply segmentation and regression models to infer true conversion sources
 
-Enable more reliable, scalable campaign performance metrics
+---
+
+**Expected impact**
+
+* Improved attribution accuracy
+* Reduced manual reconciliation
+* More reliable and scalable campaign performance metrics
