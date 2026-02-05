@@ -286,7 +286,7 @@ I added my exploratory notebook on the github.
 
 ---
 
-## Part 4 — Attribution and Advanced Recommendations
+## Part 4 
 
 ---
 
