@@ -84,6 +84,8 @@ Please find the sample version with macroses to clean the data here:
 * Model definition:  
   `mart_marketing_performance.sql`
 
+* To simplify obserfability , I put cleaning macroses in Mart and not in Stage models. All cleaning should be done in Stage, joining and calculation of metrics in Marts.
+
 ---
 
 ### 2.2 dbt and Sources
@@ -94,7 +96,7 @@ I use modular, reusable metric pipelines and dbt models.
 
 ---
 
-* Example dbt project structure:  
+*Please find here an example dbt project structure:  
   `poslite-missing-analytics`
 
 ---
@@ -231,6 +233,11 @@ Responsibilities
   * Row filtering
   * Dictionary-based channel imputation
  
+I identified some insights withiin datasets:
+I assume that the combination of Campaign_id and Campaign_Name is unique across all provided datasets, because in 3 datasets pairs are unique. I'm aware that it could be not true, just my observation and assumption to reconcile missing values.
+For example, if a given Campaign_id–Campaign_Name pair is missing from the Channel dictionary, would it be acceptable to assume that this pair is still unique and to reconcile the missing Campaign_id and Channel information using the Leads Funnel dataset for the Web Orders dataset.
+I cross-checked all three datasets and found that these pairs appear to be unique, with no contradictions identified on the Leads Funnel and Web Orders datasets as well.
+
 I added my exploratory notebook on the github.
 
 ---
