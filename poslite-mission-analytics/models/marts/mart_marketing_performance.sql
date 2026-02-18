@@ -1,4 +1,5 @@
 -- models/marts/mart_marketing_performance.sql
+--cleaning should be in Stanging layer, here added just for process flow visual explanation
 -- 1) normalize join keys (country_code, campaign_id)
 -- 2) clean text fields (campaign_name, channels)
 -- 3) coalesce using NULLIF_BLANK so blanks don't win
@@ -157,20 +158,59 @@ enriched as (
 windowed as (
     select
         *,
-
-        coalesce(total_spend_eur, 0) + coalesce(total_spend, 0) as total_spendings,
- 
- --campaign_name is optional in row_number() if campaign_id is unique substance
         row_number() over (
-            partition by date, campaign_id, campaign_name
-            order by (coalesce(total_spend_eur, 0) + coalesce(total_spend, 0)) desc
-        ) as spend_rank
-
+            partition by campaign_id, campaign_name, date
+            order by coalesce(total_spend_eur, 0) desc
+        ) as total_spend_web_rank,
+        row_number() over (
+            partition by campaign_id, campaign_name, date
+            order by coalesce(total_spend, 0) desc
+        ) as total_spend_sales_rank
     from enriched
 ),
 
+best_web as (
+    select * from windowed where total_spend_web_rank = 1
+),
+
+best_sales as (
+    select * from windowed where total_spend_sales_rank = 1
+),
+
 max_spend_rows as (
-    select * from windowed where spend_rank = 1
+    select
+        date,
+        country_code,                               
+        campaign_id,
+        campaign_name,
+        campaign_period_budget_category,
+        channel_3,        
+        channel_4,
+        channel_5,
+
+        -- web metics:
+        total_spend_eur as total_spend_web
+        nb_of_sessions,
+        nb_of_signups,
+        nb_of_orders,
+        nb_of_poslite_items_ordered,
+
+        -- sales metrics: 
+        total_spend as total_spend_sales,
+        total_impressions,
+        total_clicks,
+        total_leads,
+        total_sqls,
+        total_meeting_done,
+        total_signed_leads,
+        total_pos_lite_deals
+
+    from best_web w
+    full outer join best_sales s
+        on  w.date          = s.date
+        and w.campaign_id   = s.campaign_id
+        and w.campaign_name is not distinct from s.campaign_name
+        and w.country_code  is not distinct from s.country_code
 ),
 
 final as (
@@ -185,8 +225,6 @@ final as (
         channel_4,
         channel_5,
 
-        total_spendings,
-
         nb_of_sessions               as sessions,
         nb_of_signups                as signups,
         nb_of_orders                 as orders,
@@ -200,18 +238,23 @@ final as (
         total_signed_leads           as signed_leads,
         total_pos_lite_deals         as pos_lite_deals,
 
+        total_spend_web,
+        total_spend_sales,
+
         case
             when coalesce(total_pos_lite_deals, 0) > 0
-            then total_spendings / nullif(total_pos_lite_deals, 0)
+            then coalesce(total_spend, 0) / nullif(total_pos_lite_deals, 0)
             else null
         end as cac_per_pos_lite_deal,
 
         case
-            when coalesce(total_leads, 0) > 0
-            then coalesce(cast(total_meeting_done as numeric), 0.0)
-                 / nullif(total_leads, 0)
+            when coalesce(nb_of_poslite_items_ordered, 0) > 0
+            then coalesce(total_spend_eur, 0) / nullif(nb_of_poslite_items_ordered, 0)
             else null
-        end as conversion_rate_leads_to_meeting
+        end as cac_per_pos_lite_order_web,
+
+        coalesce(nb_of_poslite_items_ordered, 0) / nullif(nb_of_sessions, 0)    as web_funnel_throughput,
+        coalesce(total_pos_lite_deals, 0) / nullif(total_impressions, 0) as sales_funnel_throughput
 
     from max_spend_rows
 )
@@ -219,5 +262,5 @@ final as (
 select * from final
 
 {% if is_incremental() %}
-    where date >= (select max(date) - interval '7 days' from {{ this }})
+where date >= (select max(date) - interval '7 days' from {{ this }})
 {% endif %}
