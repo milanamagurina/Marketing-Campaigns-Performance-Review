@@ -225,7 +225,6 @@ Responsibilities
 * Behavioral metric columns contain missing values (NaNs)
 * Intermediate funnel steps are sometimes missing while impressions or orders exist
 * Spend and behavioral metrics are not always time-aligned
-  * Clicks do not always peak when spend peaks
   * Python-based reconciliation uses maximum observed values
 * Some `campaign_id` values are missing from the channels dictionary
   * Assumed `campaign_id` + `campaign_name` uniqueness within this dataset
@@ -308,7 +307,7 @@ This validation confirmed that they are not fully reliable in real-world marketi
 
 ---
 
-**Key observations and recommendations**
+**Improvements with Automatization and AI usage**
 
 * Six campaign IDs appear in both Web and Sales-Assisted datasets
 * Introduce user-level attribution beyond first-touch or last-touch
