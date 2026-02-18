@@ -1,5 +1,5 @@
 -- models/marts/mart_marketing_performance.sql
---cleaning should be in Stanging layer, here added just for process flow visual explanation
+--cleaning should be in Intermediate layer, here added just for process flow visual explanation
 -- 1) normalize join keys (country_code, campaign_id)
 -- 2) clean text fields (campaign_name, channels)
 -- 3) dedupe within grain by max combined spend
