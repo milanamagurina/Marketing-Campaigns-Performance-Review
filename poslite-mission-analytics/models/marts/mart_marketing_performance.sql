@@ -2,10 +2,7 @@
 --cleaning should be in Stanging layer, here added just for process flow visual explanation
 -- 1) normalize join keys (country_code, campaign_id)
 -- 2) clean text fields (campaign_name, channels)
--- 3) coalesce using NULLIF_BLANK so blanks don't win
--- 4) dedupe within grain by max combined spend
--- 5) incremental filter is now applied INSIDE each upstream CTE,
--- 6) warehouse only scans the lookback window instead of the full history before filtering.
+-- 3) dedupe within grain by max combined spend
 
 {{config(
     materialized='incremental',
