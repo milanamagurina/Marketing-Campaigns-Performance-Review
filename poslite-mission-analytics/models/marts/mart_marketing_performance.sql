@@ -3,6 +3,7 @@
 -- 1) normalize join keys (country_code, campaign_id)
 -- 2) clean text fields (campaign_name, channels)
 -- 3) dedupe within grain by max combined spend
+-- 4) metrics calculation: CAC and Funnel Thoughtput
 
 {{config(
     materialized='incremental',
