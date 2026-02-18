@@ -221,6 +221,7 @@ Responsibilities
 
 ---
 
+* Outliers 100 mln, 10000 in Metrics
 * Behavioral metric columns contain missing values (NaNs)
 * Intermediate funnel steps are sometimes missing while impressions or orders exist
 * Spend and behavioral metrics are not always time-aligned
@@ -246,50 +247,55 @@ I added my exploratory notebook on the github.
 
 
 ---
+I. Quantitative Executive Performance Summary
+The Efficiency Gap: In campaigns where both pathways were tested, the Sales-Assisted CAC was €25.30 compared to €872.77 for Web Self-Service. This represents a 34.5x better return on investment through the Sales path.
+
+The Testing Campaigns: Campaigns flagged as Test  are delivering a €49.54 CAC, while legacy Always-On campaigns has €190.10 CAC—a 74% efficiency gain through experimentation.
+
+The Growth Ceiling: Our current blended performance is 4,640 deals at a €317 CAC. By reallocating budget toward high-efficiency channels (Sales-Assisted Facebook/Bing), we can scale to 8,093 deals while lowering the Blended CAC to €182.
 
 **Good initiatives to start**
 
-* **Predictive analytics for sales prioritization**
-  * 28-day rolling window aligned with a two-week sales cycle
-  * Contact-form submissions drive most order spikes
-  * Opportunity to automate lead scoring
+* **Optimize Channels**
+  * High-Yield Bing Shopping has €6.75 - €18.25 CAC for Bing Shopping Sales Leads.	Extremely low competition and high product-specific intent.	There is untapped "Headroom" in Bing to offset expensive Google Search costs.	Increase Bing Shopping bids to capture 90%+ Impression Share.
+  * Low lead volume for contact-form traffic
+  * Opportunity to improve targeting, creatives, or structure
 
-* **Simplify the sign-up flow**
+* **Analyse and simplify if possible the sign-up flow**
   * Lowest conversion rate in the funnel
   * Reducing friction could improve downstream performance
 
-* **Further optimize Facebook targeting**
-  * Low silent-lead volume for contact-form traffic
-  * Opportunity to improve targeting, creatives, or structure
+* **"Test" Campaign Experiments Adoption**
+ * "Test" Campaign Adoption	€49 CAC (Test) vs. €190 (Live).
+
+
+
+    
+* **Predictive analytics for sales prioritization**
 
 ---
 
 **Areas to improve**
 
+* **CAC led Budget Realocation**
+  * Sales Lead CAC (34.56 Euros) is more effective than Web CAC (2212 Euros). Success Metric for Sales Assisted process - POS Lite Deal, Web - Orders. Should be recalculated ROI. Please have a look on the Dashboard Simulation Budget Realocation.
+
+* **Generic Search Prospecting (Web)**
+  * Generic Search Prospecting (Web) having	€550.63 CAC for Search Prospecting on Web. Shifting to a "Lead Form" will capture the intent without the checkout friction.
+    
 * **Manual sales lead processing**
-  * Limits scalability
+  * Limits scalability (15k Leads resulting in 12k SQLs - 80% rate)
   * Constrains sales efficiency under CAC/CBO optimization goals
 
 ---
 
-**Continue with optimization**
-
-* **Spend optimization using rolling windows**
-  * 28-day window captures the full sales cycle
-  * Ensures data completeness
-
-* **Optimize CAC / cost per sale**
-  * Correct primary optimization metric
-  * Should be paired with automated sales workflows
-
----
 
 ### 3.3 Dashboard
 
 ---
 
 * Tableau dashboard  
-  https://public.tableau.com/app/profile/milana.magurina/viz/Pos-LiteCampaignsPerformanceOverview/PerformanceOverview?publish=yes
+  https://public.tableau.com/app/profile/milana.magurina/viz/ExecituveOverviewPOSLiteCampaigns/PerformanceOverview?publish=yes
 
 ---
 
